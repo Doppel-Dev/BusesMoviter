@@ -2,7 +2,7 @@
 
 Sitio web corporativo y sistema de cotización para **Buses Moviter**, empresa líder en transporte privado de personal y viajes especiales en Chile.
 
-## 🚀 Características
+## Características
 
 - **Diseño Premium:** Interfaz moderna, responsiva y corporativa construida con React y Bootstrap.
 - **MoviBot:** Asistente virtual inteligente que guía a los usuarios a través del proceso de cotización.
@@ -10,7 +10,7 @@ Sitio web corporativo y sistema de cotización para **Buses Moviter**, empresa l
 - **Galería de Servicios:** Visualización de la flota y servicios ofrecidos.
 - **Optimización de Rendimiento:** Uso de Framer Motion para animaciones fluidas y mejores prácticas de React.
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 ### Frontend
 - **React 18** (Vite)
@@ -23,7 +23,7 @@ Sitio web corporativo y sistema de cotización para **Buses Moviter**, empresa l
 - **Express**
 - **CORS**
 
-## 📂 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```text
 ├── buses-moviter-frontend/   # Aplicación React (Interfaz de usuario)
@@ -32,7 +32,7 @@ Sitio web corporativo y sistema de cotización para **Buses Moviter**, empresa l
 └── imagenes/                 # Galería y contenido visual
 ```
 
-## ⚙️ Instalación y Uso
+## Instalación y Uso
 
 ### Requisitos
 - Node.js (v16 o superior)
@@ -48,11 +48,11 @@ Sitio web corporativo y sistema de cotización para **Buses Moviter**, empresa l
 2. Instalar dependencias: `npm install`
 3. Iniciar servidor: `npm start`
 
-## 📧 Contacto
+## Contacto
 
 - **Ubicación:** Peñaflor, Región Metropolitana, Chile.
 - **Teléfono:** +56 9 8179 6847
 - **Web:** [www.busesmoviter.cl](http://www.busesmoviter.cl)
 
 ---
-Desarrollado con ❤️ para Buses Moviter.
+Desarrollado para Buses Moviter.
