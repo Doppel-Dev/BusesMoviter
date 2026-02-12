@@ -1,0 +1,105 @@
+/* Services.css */
+.services-corporate-section {
+  background-color: var(--color-secundario);
+  padding: 120px 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.services-bg-decoration {
+  position: absolute;
+  top: -10%;
+  right: -5%;
+  width: 40%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(0, 64, 128, 0.03) 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.services-intro {
+  color: var(--color-texto-secundario);
+  font-size: 1.2rem;
+  max-width: 700px;
+  margin: 0 auto;
+  font-weight: 300;
+}
+
+.service-card-premium {
+  background: white;
+  padding: 50px 30px;
+  border-radius: 12px;
+  border: 1px solid var(--color-borde);
+  height: 100%;
+  transition: var(--transicion-corporate);
+  box-shadow: var(--sombra-suave);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.service-card-premium:hover {
+  transform: translateY(-15px);
+  box-shadow: var(--sombra-premium);
+  border-color: rgba(0, 64, 128, 0.1);
+}
+
+.service-icon-box-modern {
+  width: 80px;
+  height: 80px;
+  background: var(--color-secundario);
+  color: var(--color-acento);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  margin-bottom: 30px;
+  transition: var(--transicion-corporate);
+}
+
+.service-card-premium:hover .service-icon-box-modern {
+  background: var(--color-acento);
+  color: white;
+  transform: scale(1.1);
+}
+
+.service-card-title {
+  font-family: var(--fuente-titulos);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--color-texto-principal);
+}
+
+.service-card-text {
+  font-size: 1rem;
+  color: var(--color-texto-secundario);
+  line-height: 1.7;
+  margin: 0;
+  font-weight: 400;
+}
+
+.card-footer-decoration {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 4px;
+  background: var(--color-acento);
+  transition: var(--transicion-corporate);
+  border-radius: 0 0 0 12px;
+}
+
+.service-card-premium:hover .card-footer-decoration {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .service-card-premium {
+    padding: 30px 20px;
+  }
+}

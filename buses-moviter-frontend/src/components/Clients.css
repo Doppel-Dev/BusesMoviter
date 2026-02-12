@@ -1,0 +1,113 @@
+/* Clients.css */
+.clients-corporate-section {
+    background-color: var(--color-secundario);
+    padding: 120px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.clients-bg-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(0, 64, 128, 0.05) 0%, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.clients-subtitle {
+    color: var(--color-texto-secundario);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.client-logo-card-modern {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    border: 1px solid var(--color-borde);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: var(--transicion-corporate);
+    position: relative;
+    z-index: 1;
+}
+
+.client-logo-card-modern:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--sombra-premium);
+    border-color: rgba(0, 64, 128, 0.1);
+}
+
+.client-logo-svg-wrapper {
+    height: 80px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 25px;
+    filter: grayscale(1);
+    opacity: 0.6;
+    transition: var(--transicion-corporate);
+}
+
+.client-logo-card-modern:hover .client-logo-svg-wrapper {
+    filter: grayscale(0);
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.client-logo-svg-wrapper svg,
+.client-logo-svg-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.client-details-modern {
+    margin-top: auto;
+}
+
+.client-name-modern {
+    font-family: var(--fuente-titulos);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-texto-principal);
+    margin-bottom: 5px;
+}
+
+.client-sector-modern {
+    font-size: 0.85rem;
+    color: var(--color-texto-secundario);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+}
+
+.client-card-glow {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    background: linear-gradient(0deg, rgba(0, 64, 128, 0.02) 0%, transparent 100%);
+    transition: var(--transicion-corporate);
+    border-radius: 0 0 12px 12px;
+}
+
+.client-logo-card-modern:hover .client-card-glow {
+    height: 50%;
+}
+
+@media (max-width: 768px) {
+    .client-logo-card-modern {
+        padding: 30px 20px;
+    }
+}

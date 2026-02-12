@@ -1,0 +1,188 @@
+/* index.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lexend:wght@400;600;700&display=swap');
+
+:root {
+  /* ### Corporate Light Palette ### */
+  --color-primario: #FFFFFF;
+  --color-secundario: #F8FAFC; 
+  --color-acento: #004080; 
+  --color-acento-hover: #002D5A;
+  --color-texto-principal: #1E293B; 
+  --color-texto-secundario: #64748B; 
+  --color-borde: #E2E8F0;
+  
+  /* ### Typography ### */
+  --fuente-titulos: 'Lexend', sans-serif;
+  --fuente-cuerpo: 'Inter', sans-serif;
+  
+  --transicion-corporate: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  --sombra-suave: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --sombra-card: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  --sombra-premium: 0 30px 60px -12px rgba(0, 45, 90, 0.12), 0 18px 36px -18px rgba(0, 0, 0, 0.2);
+}
+
+::selection {
+  background-color: var(--color-acento);
+  color: white;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--fuente-cuerpo);
+  background-color: var(--color-primario);
+  color: var(--color-texto-principal);
+  overflow-x: hidden;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-secundario);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E0;
+  border-radius: 10px;
+  border: 2px solid var(--color-secundario);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-acento);
+}
+
+section {
+  padding: 100px 0;
+  position: relative;
+}
+
+/* Reveal Utility */
+.reveal-text {
+  overflow: hidden;
+  position: relative;
+}
+
+.reveal-text-inner {
+  display: block;
+}
+
+.section-title {
+  font-family: var(--fuente-titulos);
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--color-acento);
+  text-align: center;
+  margin-bottom: 50px;
+  position: relative;
+  letter-spacing: -0.5px;
+}
+
+.section-title::before {
+  content: 'EXPERIENCIA';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  letter-spacing: 4px;
+  color: var(--color-texto-secundario);
+  opacity: 0.5;
+  font-weight: 600;
+}
+
+.section-title::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 4px;
+  background: var(--color-acento);
+  margin: 20px auto 0;
+  border-radius: 4px;
+}
+
+/* Global Corporate Buttons */
+.btn-corporate-primary {
+  background-color: var(--color-acento);
+  border: 1px solid var(--color-acento);
+  padding: 18px 40px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  transition: var(--transicion-corporate);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: white !important;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.btn-corporate-primary:hover {
+  background-color: white;
+  color: var(--color-acento) !important;
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.btn-corporate-outline {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white !important;
+  padding: 18px 40px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  transition: var(--transicion-corporate);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.btn-corporate-outline:hover {
+  background-color: white;
+  color: var(--color-acento) !important;
+  border-color: white;
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Outline for light backgrounds */
+.btn-corporate-outline-dark {
+  background-color: transparent;
+  border: 1px solid var(--color-acento);
+  color: var(--color-acento) !important;
+  padding: 18px 40px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  transition: var(--transicion-corporate);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-corporate-outline-dark:hover {
+  background-color: var(--color-acento);
+  color: white !important;
+  border-color: var(--color-acento);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 2rem;
+  }
+}
