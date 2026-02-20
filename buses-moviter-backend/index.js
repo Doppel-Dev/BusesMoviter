@@ -42,18 +42,6 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Verificar conexión al inicio (envuelto en setImmediate para no bloquear el inicio del servidor)
-setImmediate(() => {
-  transporter.verify(function (error, success) {
-    if (error) {
-      console.log("--- ERROR DE CONFIGURACIÓN DE EMAIL ---");
-      console.error(error);
-    } else {
-      console.log("✅ Servidor de email listo para enviar mensajes");
-    }
-  });
-});
-
 // Endpoint para recibir cotizaciones
 app.post('/api/quote', async (req, res) => {
   const { name, email, phone, company, serviceType, passengers, date, tripType, trips, details } = req.body;
