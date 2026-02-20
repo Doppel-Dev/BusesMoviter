@@ -28,6 +28,9 @@ app.use(cors({ origin: '*' }));
 app.use(morgan('dev'));
 
 const googleMapsClient = new Client({});
+
+// Configuración de Nodemailer para Gmail (Intento Final con Puerto 465 - SSL)
+const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
   secure: true, // true para puerto 465 (SSL)
