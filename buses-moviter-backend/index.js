@@ -10,35 +10,29 @@ const { Client } = require("@googlemaps/google-maps-services-js");
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// 1. ARRANCAR EL SERVIDOR DE INMEDIATO (Para que Railway vea el puerto abierto)
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ SERVIDOR INICIADO EXITOSAMENTE`);
-  console.log(`📍 Puerto detectado: ${PORT}`);
-  console.log(`🌐 Entorno: ${process.env.NODE_ENV || 'development'}`);
-});
+// 1. Middlewares Básicos
+app.use(helmet());
+app.use(cors({ origin: '*' }));
+app.use(express.json());
+app.use(morgan('dev'));
 
-// 2. Ruta de Salud para Railway
+// 2. Ruta de Salud (Crucial para Railway)
 app.get('/', (req, res) => {
   res.status(200).send('Servidor Buses Moviter Online');
 });
 
-// 3. Middlewares
-app.use(express.json());
-app.use(cors({ origin: '*' }));
-app.use(morgan('dev'));
-
 const googleMapsClient = new Client({});
 
-// Configuración de Nodemailer para Gmail (Intento Final con Puerto 465 - SSL)
+// 3. Configuración de Nodemailer
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
-  secure: true, // true para puerto 465 (SSL)
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
-  connectionTimeout: 15000, // 15 segundos de espera
+  connectionTimeout: 15000,
   greetingTimeout: 15000,
   socketTimeout: 20000,
   tls: {
@@ -46,7 +40,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Endpoint para recibir cotizaciones
+// 4. Endpoint para recibir cotizaciones
 app.post('/api/quote', async (req, res) => {
   const { name, email, phone, company, serviceType, passengers, date, tripType, trips, details } = req.body;
 
@@ -54,13 +48,9 @@ app.post('/api/quote', async (req, res) => {
     return res.status(400).json({ error: 'Faltan campos obligatorios (Nombre, Email, Teléfono)' });
   }
 
-  let totalDistanceValue = 0; // en metros
+  let totalDistanceValue = 0;
   let tripsHtml = '';
-  
-  let validTrips = [];
-  if (Array.isArray(trips)) {
-    validTrips = trips.filter(t => t && t.origin && t.destination);
-  }
+  let validTrips = Array.isArray(trips) ? trips.filter(t => t && t.origin && t.destination) : [];
 
   if (validTrips.length > 0) {
     for (const [index, trip] of validTrips.entries()) {
@@ -81,7 +71,7 @@ app.post('/api/quote', async (req, res) => {
       
       if (trip.origin.value && trip.destination.value) {
         try {
-          const apiKey = process.env.GOOGLE_MAPS_API_KEY || "AIzaSyAcwokKJ7ngkj36HrmbeGplRlTf5SSzop8";
+          const apiKey = process.env.GOOGLE_MAPS_API_KEY;
           const originId = trip.origin.value.place_id;
           const destinationId = trip.destination.value.place_id;
           
@@ -108,11 +98,9 @@ app.post('/api/quote', async (req, res) => {
             return 0;
           };
 
-          // Distancia de IDA
           const idaDistance = await getDistance(originId, destinationId, trip.stops);
           totalDistanceValue += idaDistance;
 
-          // Distancia de VUELTA (si aplica, calculada de forma real)
           if (tripType === 'roundTrip') {
             const reversedStops = [...(trip.stops || [])].reverse();
             const vueltaDistance = await getDistance(destinationId, originId, reversedStops);
@@ -139,7 +127,6 @@ app.post('/api/quote', async (req, res) => {
     }
   }
 
-  // SIN MARGEN OPERATIVO, SOLO DISTANCIA REAL
   const finalDistanceValue = totalDistanceValue;
   const totalDistanceKm = finalDistanceValue / 1000;
   
@@ -151,8 +138,7 @@ app.post('/api/quote', async (req, res) => {
     from: process.env.EMAIL_USER,
     to: 'busesmoviter@hotmail.com',
     subject: `Nueva Cotización: ${serviceType} - ${name}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+    html: `<div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
         <h2 style="color: #004080; border-bottom: 2px solid #004080; padding-bottom: 10px;">Solicitud de Cotización</h2>
         <p><strong>Nombre:</strong> ${name}</p>
         <p><strong>Email:</strong> ${email}</p>
@@ -163,34 +149,34 @@ app.post('/api/quote', async (req, res) => {
         <p><strong>Pasajeros:</strong> ${passengers}</p>
         <p><strong>Fecha Estimada:</strong> ${date}</p>
         <p><strong>Tipo de Viaje:</strong> ${tripType === 'roundTrip' ? 'Ida y Vuelta (Ruta real)' : 'Solo Ida'}</p>
-        
         <h3 style="color: #004080;">Detalle de Trayectos:</h3>
         ${tripsHtml || '<p style="color: #666;">No se especificaron trayectos detallados.</p>'}
-        
         <div style="margin-top: 20px; padding: 15px; background: #fff3f3; border: 1px solid #ffcdd2; border-radius: 5px;">
           <p style="margin: 0;"><strong>Distancia Total:</strong> ${totalDistanceKm.toFixed(2)} km</p>
-          <p style="margin: 5px 0 0 0; font-size: 1.2em; color: #d9534f; font-weight: bold;">
-            Presupuesto Sugerido (Interno): ${estimatedBudget}
-          </p>
-          <p style="margin-top: 5px; font-size: 0.8em; color: #666;">* Cálculo basado en rutas que evitan autopistas y sin márgenes adicionales.</p>
+          <p style="margin: 5px 0 0 0; font-size: 1.2em; color: #d9534f; font-weight: bold;">Presupuesto Sugerido (Interno): ${estimatedBudget}</p>
         </div>
         <hr>
         <p><strong>Detalles Adicionales:</strong></p>
         <p style="background: #f9f9f9; padding: 15px; border-radius: 5px;">${details || 'Sin detalles adicionales'}</p>
-      </div>
-    `
+      </div>`
   };
 
   try {
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       await transporter.sendMail(mailOptions);
     }
-    res.status(200).json({ message: 'Cotización recibida y enviada con éxito' });
+    res.status(200).json({ message: 'Cotización enviada con éxito' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al procesar la solicitud.' });
+    console.error('Error enviando mail:', error);
+    res.status(500).json({ error: 'Error al enviar el email' });
   }
 });
 
 app.get('/api/status', (req, res) => {
-  res.send('Buses Moviter API is running...');
+  res.send('API running');
+});
+
+// 5. ARRANQUE AL FINAL (Práctica recomendada)
+app.listen(PORT, () => {
+  console.log(`✅ Servidor en línea en puerto ${PORT}`);
 });
