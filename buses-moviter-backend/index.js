@@ -9,23 +9,29 @@ const { Client } = require("@googlemaps/google-maps-services-js");
 
 const app = express();
 const googleMapsClient = new Client({});
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
-// Middleware
+// 1. Ruta de Salud inmediata (Prioridad #1 para Railway)
+app.get('/', (req, res) => {
+  res.status(200).send('✅ Servidor Buses Moviter Activo');
+});
+
+// 2. Middleware básicos
 app.use(helmet());
 app.use(cors({
-  origin: [
-    'http://localhost:5173', // Para desarrollo local
-    'https://busesmoviter.com',   // Tu dominio de Hostinger (Sin la barra / al final)
-    'https://www.busesmoviter.com'
-  ],
+  origin: '*', // Permitir conexión desde Hostinger
   methods: ['GET', 'POST'],
   credentials: true
 }));
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Configuración de Nodemailer para Gmail (Intento Final con Puerto 465 - SSL)
+// 3. ARRANQUE DEL SERVIDOR (No esperar a nada más)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Servidor validado y corriendo en puerto ${PORT}`);
+});
+
+// 4. Lógica de Negocio y Email (Después del arranque)
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
@@ -187,10 +193,6 @@ app.post('/api/quote', async (req, res) => {
   }
 });
 
-app.get('/', (req, res) => {
+app.get('/api/status', (req, res) => {
   res.send('Buses Moviter API is running...');
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on port ${PORT}`);
 });
