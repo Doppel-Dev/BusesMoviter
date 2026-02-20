@@ -25,18 +25,20 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Configuración de Nodemailer para Gmail (Forzando IPv4 para Railway)
+// Configuración de Nodemailer para Gmail (Intento Final con Puerto 465 - SSL)
 const transporter = nodemailer.createTransport({
-  host: '74.125.142.108', // IP fija de smtp.gmail.com para forzar IPv4
-  port: 587,
-  secure: false,
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // true para puerto 465 (SSL)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
+  connectionTimeout: 15000, // 15 segundos de espera
+  greetingTimeout: 15000,
+  socketTimeout: 20000,
   tls: {
-    rejectUnauthorized: false,
-    servername: 'smtp.gmail.com' // Necesario al usar la IP directa
+    rejectUnauthorized: false
   }
 });
 
