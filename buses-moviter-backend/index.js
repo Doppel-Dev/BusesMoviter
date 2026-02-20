@@ -25,11 +25,6 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Arrancar servidor inmediatamente para que Railway no corte la conexión
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
 // Configuración de Nodemailer para Gmail (más robusta para Railway)
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -44,14 +39,16 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Verificar conexión al inicio
-transporter.verify(function (error, success) {
-  if (error) {
-    console.log("--- ERROR DE CONFIGURACIÓN DE EMAIL ---");
-    console.error(error);
-  } else {
-    console.log("✅ Servidor de email listo para enviar mensajes");
-  }
+// Verificar conexión al inicio (envuelto en setImmediate para no bloquear el inicio del servidor)
+setImmediate(() => {
+  transporter.verify(function (error, success) {
+    if (error) {
+      console.log("--- ERROR DE CONFIGURACIÓN DE EMAIL ---");
+      console.error(error);
+    } else {
+      console.log("✅ Servidor de email listo para enviar mensajes");
+    }
+  });
 });
 
 // Endpoint para recibir cotizaciones
@@ -201,4 +198,8 @@ app.post('/api/quote', async (req, res) => {
 
 app.get('/', (req, res) => {
   res.send('Buses Moviter API is running...');
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT}`);
 });
