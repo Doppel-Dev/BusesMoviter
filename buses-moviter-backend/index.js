@@ -8,31 +8,26 @@ const axios = require('axios');
 const { Client } = require("@googlemaps/google-maps-services-js");
 
 const app = express();
-const googleMapsClient = new Client({});
 const PORT = process.env.PORT || 8080;
 
-// 1. Ruta de Salud inmediata (Prioridad #1 para Railway)
-app.get('/', (req, res) => {
-  res.status(200).send('✅ Servidor Buses Moviter Activo');
+// 1. ARRANCAR EL SERVIDOR DE INMEDIATO (Para que Railway vea el puerto abierto)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ SERVIDOR INICIADO EXITOSAMENTE`);
+  console.log(`📍 Puerto detectado: ${PORT}`);
+  console.log(`🌐 Entorno: ${process.env.NODE_ENV || 'development'}`);
 });
 
-// 2. Middleware básicos
-app.use(helmet());
-app.use(cors({
-  origin: '*', // Permitir conexión desde Hostinger
-  methods: ['GET', 'POST'],
-  credentials: true
-}));
+// 2. Ruta de Salud para Railway
+app.get('/', (req, res) => {
+  res.status(200).send('Servidor Buses Moviter Online');
+});
+
+// 3. Middlewares
 app.use(express.json());
+app.use(cors({ origin: '*' }));
 app.use(morgan('dev'));
 
-// 3. ARRANQUE DEL SERVIDOR (No esperar a nada más)
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Servidor validado y corriendo en puerto ${PORT}`);
-});
-
-// 4. Lógica de Negocio y Email (Después del arranque)
-const transporter = nodemailer.createTransport({
+const googleMapsClient = new Client({});
   host: 'smtp.gmail.com',
   port: 465,
   secure: true, // true para puerto 465 (SSL)
