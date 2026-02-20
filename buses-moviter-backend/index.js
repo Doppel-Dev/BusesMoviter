@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
@@ -7,10 +6,26 @@ const morgan = require('morgan');
 const axios = require('axios');
 const { Client } = require("@googlemaps/google-maps-services-js");
 
+// Solo cargar dotenv si NO estamos en producción o si no hay puerto definido
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 const app = express();
+// PRIORIDAD ABSOLUTA AL PUERTO DE RAILWAY
 const PORT = process.env.PORT || 8080;
 
-// 1. RUTA DE SALUD (Prioridad absoluta para Railway)
+// MANEJO DE ERRORES GLOBALES (Para que no muera en silencio)
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Error No Manejado (Rejection):', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('❌ Error Crítico (Exception):', error);
+  process.exit(1);
+});
+
+// 1. RUTA DE SALUD INMEDIATA
 app.get('/', (req, res) => {
   res.status(200).send('✅ Servidor Buses Moviter Activo');
 });
@@ -21,7 +36,7 @@ app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(morgan('dev'));
 
-// 3. Configuración de Email Forzando IPv4
+// 3. Configuración de Email
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
@@ -30,80 +45,56 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
-  tls: {
-    rejectUnauthorized: false,
-    servername: 'smtp.gmail.com'
-  }
+  tls: { rejectUnauthorized: false }
 });
 
-// 4. Endpoint de Cotización con Respuesta Inmediata
+// 4. Endpoint de Cotización
 app.post('/api/quote', async (req, res) => {
   const { name, email, phone, serviceType, passengers, date, tripType, trips, details, company } = req.body;
+  if (!name || !email || !phone) return res.status(400).json({ error: 'Faltan campos' });
 
-  // Validación básica
-  if (!name || !email || !phone) {
-    return res.status(400).json({ error: 'Faltan campos' });
-  }
+  // Responder de inmediato para evitar timeouts en Railway
+  res.status(200).json({ message: 'Solicitud en proceso' });
 
-  // RESPUESTA INMEDIATA: Le decimos al frontend (y a Railway) que todo está en proceso
-  // Esto evita que la conexión se quede colgada y Railway mate el proceso
-  res.status(200).json({ message: 'Solicitud recibida, procesando envío de email...' });
-
-  // Lógica en segundo plano (Background)
+  // Lógica asíncrona en segundo plano
   (async () => {
     try {
       let totalDistanceKm = 0;
       let tripsHtml = '';
       const apiKey = process.env.GOOGLE_MAPS_API_KEY;
 
-      if (Array.isArray(trips) && trips.length > 0) {
-        for (const [index, trip] of trips.entries()) {
-          if (trip.origin && trip.destination) {
-            try {
-              const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=place_id:${trip.origin.value.place_id}&destinations=place_id:${trip.destination.value.place_id}&mode=driving&avoid=highways&key=${apiKey}`;
-              const distRes = await axios.get(url);
-              if (distRes.data.status === 'OK') {
-                const meters = distRes.data.rows[0].elements[0].distance.value;
-                totalDistanceKm += (meters / 1000);
-                if (tripType === 'roundTrip') totalDistanceKm += (meters / 1000);
-              }
-            } catch (err) { console.error('Error calculando distancia:', err.message); }
+      if (Array.isArray(trips)) {
+        for (const trip of trips) {
+          if (trip.origin?.value?.place_id && trip.destination?.value?.place_id) {
+            const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=place_id:${trip.origin.value.place_id}&destinations=place_id:${trip.destination.value.place_id}&key=${apiKey}`;
+            const res = await axios.get(url);
+            if (res.data.status === 'OK') {
+              const meters = res.data.rows[0].elements[0].distance.value;
+              totalDistanceKm += (meters / 1000);
+              if (tripType === 'roundTrip') totalDistanceKm += (meters / 1000);
+            }
           }
         }
       }
 
-      const estimatedBudget = totalDistanceKm > 0 
-        ? `$${(totalDistanceKm * 2500).toLocaleString('es-CL')} CLP`
-        : 'No calculado';
+      const budget = totalDistanceKm > 0 ? `$${(totalDistanceKm * 2500).toLocaleString('es-CL')} CLP` : 'A convenir';
 
-      const mailOptions = {
+      await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: 'busesmoviter@hotmail.com',
-        subject: `Nueva Cotización: ${serviceType} - ${name}`,
-        html: `<div style="font-family: Arial; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-          <h2 style="color: #004080;">Nueva Solicitud de Cotización</h2>
-          <p><strong>Cliente:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email} | <strong>Tel:</strong> ${phone}</p>
-          <p><strong>Pasajeros:</strong> ${passengers} | <strong>Fecha:</strong> ${date}</p>
-          <p><strong>Distancia:</strong> ${totalDistanceKm.toFixed(2)} km</p>
-          <p><strong>Presupuesto Sugerido:</strong> ${estimatedBudget}</p>
-          <hr>
-          <p><strong>Detalles:</strong> ${details || 'Sin detalles'}</p>
-        </div>`
-      };
-
-      await transporter.sendMail(mailOptions);
-      console.log('✅ Email enviado con éxito');
-    } catch (error) {
-      console.error('❌ Error en proceso de segundo plano:', error.message);
+        subject: `Nueva Cotización: ${name}`,
+        html: `<h3>Solicitud de Cotización</h3><p><strong>Cliente:</strong> ${name}</p><p><strong>Tel:</strong> ${phone}</p><p><strong>Pasajeros:</strong> ${passengers}</p><p><strong>Distancia:</strong> ${totalDistanceKm.toFixed(1)} km</p><p><strong>Presupuesto:</strong> ${budget}</p>`
+      });
+      console.log('📧 Email enviado exitosamente');
+    } catch (e) {
+      console.error('❌ Error procesando cotización:', e.message);
     }
   })();
 });
 
-// 5. ARRANQUE DEL SERVIDOR
+// 5. ARRANQUE
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 SERVIDOR ACTIVO EN PUERTO: ${PORT}`);
+  console.log(`🚀 SERVIDOR INICIADO`);
+  console.log(`📍 Puerto: ${PORT}`);
+  console.log(`🌐 Modo: ${process.env.NODE_ENV || 'development'}`);
 });
