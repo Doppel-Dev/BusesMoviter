@@ -48,11 +48,5 @@ Sitio web corporativo y sistema de cotización para **Buses Moviter**, empresa l
 2. Instalar dependencias: `npm install`
 3. Iniciar servidor: `npm start`
 
-## Contacto
-
-- **Ubicación:** Peñaflor, Región Metropolitana, Chile.
-- **Teléfono:** +56 9 8179 6847
-- **Web:** [www.busesmoviter.cl](http://www.busesmoviter.cl)
-
 ---
 Desarrollado para Buses Moviter.
