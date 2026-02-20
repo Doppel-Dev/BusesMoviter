@@ -25,6 +25,11 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 
+// Arrancar servidor inmediatamente para que Railway no corte la conexión
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
 // Configuración de Nodemailer para Gmail (más robusta para Railway)
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -196,8 +201,4 @@ app.post('/api/quote', async (req, res) => {
 
 app.get('/', (req, res) => {
   res.send('Buses Moviter API is running...');
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on port ${PORT}`);
 });
