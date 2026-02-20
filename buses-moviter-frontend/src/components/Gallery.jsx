@@ -26,29 +26,18 @@ const images = [
   { src: g6, title: 'Servicios Corporativos', desc: 'Soluciones a medida para el traslado de ejecutivos y personal.' },
   { src: g7, title: 'Confort y tecnología', desc: 'Interiores diseñados para una experiencia de viaje superior.' },
   { src: g8, title: 'Logística de precisión', desc: 'Puntualidad y coordinación en cada servicio.' },
+  { src: g9, title: 'Excelencia en el camino', desc: 'Comprometidos con la calidad en cada detalle.' },
+  { src: g10, title: 'Infraestructura robusta', desc: 'Buses preparados para cualquier desafío logístico.' },
   { src: g11, title: 'Conductores calificados', desc: 'Personal con amplia trayectoria y capacitación.' },
   { src: g12, title: 'Disponibilidad nacional', desc: 'Cobertura integral a lo largo de todo Chile.' },
 ];
 
 const Gallery = () => {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { scale: 0.9, opacity: 0 },
-    visible: {
-      scale: 1,
-      opacity: 1,
-      transition: { duration: 0.6, ease: [0.23, 1, 0.32, 1] }
-    }
-  };
+  // Función para agrupar las imágenes de 3 en 3
+  const chunkedImages = [];
+  for (let i = 0; i < images.length; i += 3) {
+    chunkedImages.push(images.slice(i, i + 3));
+  }
 
   return (
     <section id="galeria" className="gallery-corporate-section">
@@ -64,32 +53,44 @@ const Gallery = () => {
           <p className="gallery-subtitle">Tecnología y confort a su disposición en cada kilómetro.</p>
         </motion.div>
 
-        <motion.div 
-          className="gallery-grid-modern"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="gallery-carousel-wrapper"
         >
-          {images.map((img, i) => (
-            <motion.div 
-              key={i} 
-              className={`gallery-item-modern ${i % 5 === 0 ? 'wide' : i % 7 === 0 ? 'tall' : ''}`}
-              variants={itemVariants}
-              whileHover={{ y: -5 }}
-            >
-              <div className="gallery-img-wrapper">
-                <img src={img.src} alt={img.title} className="gallery-img-modern-content" />
-                <div className="gallery-overlay-modern">
-                  <div className="overlay-content-modern">
-                    <span className="overlay-category">FLOTA</span>
-                    <h4 className="overlay-title">{img.title}</h4>
-                    <p className="overlay-desc">{img.desc}</p>
-                  </div>
+          <Carousel 
+            indicators={true} 
+            interval={6000} 
+            pause="hover"
+            className="fleet-carousel-multi"
+          >
+            {chunkedImages.map((chunk, slideIndex) => (
+              <Carousel.Item key={slideIndex}>
+                <div className="carousel-multi-container">
+                  {chunk.map((img, imgIndex) => (
+                    <div key={imgIndex} className="carousel-multi-item">
+                      <div className="carousel-img-container">
+                        <img
+                          className="d-block w-100 carousel-fleet-img"
+                          src={img.src}
+                          alt={img.title}
+                        />
+                        <div className="carousel-custom-overlay">
+                          <div className="overlay-text-content">
+                            <span className="overlay-badge">FLOTA</span>
+                            <h4>{img.title}</h4>
+                            <p>{img.desc}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </Carousel.Item>
+            ))}
+          </Carousel>
         </motion.div>
       </Container>
     </section>

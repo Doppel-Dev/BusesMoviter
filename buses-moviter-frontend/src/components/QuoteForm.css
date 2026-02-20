@@ -334,3 +334,61 @@
         padding: 40px 20px;
     }
 }
+
+/* Phone Input Custom Styles */
+.phone-input-container {
+  width: 100%;
+}
+
+.phone-input-container .form-control {
+  width: 100% !important;
+  height: 48px !important;
+  padding-left: 55px !important;
+  border: 1px solid var(--color-borde) !important;
+  border-radius: 8px !important;
+  font-size: 1rem !important;
+  background-color: #fcfcfd !important;
+}
+
+.phone-input-container .form-control:focus {
+  border-color: var(--color-acento) !important;
+  box-shadow: 0 0 0 4px rgba(0, 64, 128, 0.1) !important;
+}
+
+.phone-input-button {
+  background: transparent !important;
+  border: 1px solid var(--color-borde) !important;
+  border-right: none !important;
+  border-radius: 8px 0 0 8px !important;
+  padding: 0 5px !important;
+  height: 48px !important;
+}
+
+.phone-input-container .flag-dropdown {
+  border-radius: 8px 0 0 8px !important;
+  border: 1px solid var(--color-borde) !important;
+  background: transparent !important;
+}
+
+.phone-input-container .selected-flag {
+  background: transparent !important;
+  width: 45px !important;
+}
+
+/* SweetAlert Customization */
+.swal2-popup {
+  border-radius: 20px !important;
+  padding: 2rem !important;
+}
+
+.swal2-title {
+  color: var(--color-acento) !important;
+  font-family: var(--fuente-titulos) !important;
+  font-weight: 700 !important;
+}
+
+.swal2-styled.swal2-confirm {
+  background-color: var(--color-acento) !important;
+  padding: 12px 30px !important;
+  border-radius: 8px !important;
+}

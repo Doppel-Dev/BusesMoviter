@@ -7,6 +7,9 @@ import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
 import { GoogleMap, LoadScript, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { es } from 'date-fns/locale/es';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import Swal from 'sweetalert2';
 import "react-datepicker/dist/react-datepicker.css";
 import './QuoteForm.css';
 
@@ -173,7 +176,64 @@ const QuoteForm = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const nextStep = () => setStep(step + 1);
+  const handlePhoneChange = (value) => {
+    setFormData({ ...formData, phone: value });
+  };
+
+  const isPhoneValid = (phone) => {
+    // Validar formato chileno con PhoneInput: empieza con 56 y tiene 11 caracteres en total
+    return phone && phone.startsWith('56') && phone.length === 11;
+  };
+
+  const nextStep = () => {
+    if (step === 1) {
+      // Validación de Nombre
+      if (!formData.name || formData.name.trim().length < 3) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Nombre Requerido',
+          text: 'Por favor, ingrese su nombre completo (mínimo 3 caracteres).',
+          confirmButtonColor: '#004080'
+        });
+        return;
+      }
+
+      // Validación de Teléfono
+      if (!isPhoneValid(formData.phone)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Número Inválido',
+          text: 'Por favor, ingrese un número de teléfono chileno válido.',
+          confirmButtonColor: '#004080'
+        });
+        return;
+      }
+
+      // Validación de Email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!formData.email || !emailRegex.test(formData.email)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Correo Inválido',
+          text: 'Por favor, ingrese una dirección de correo electrónico válida (ejemplo@empresa.cl).',
+          confirmButtonColor: '#004080'
+        });
+        return;
+      }
+    } else if (step === 2) {
+      // Validación de Pasajeros
+      if (!formData.passengers || parseInt(formData.passengers) <= 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Cantidad de Pasajeros',
+          text: 'Por favor, ingrese un número de pasajeros válido (mayor a 0).',
+          confirmButtonColor: '#004080'
+        });
+        return;
+      }
+    }
+    setStep(step + 1);
+  };
   const prevStep = () => setStep(step - 1);
 
   const handleSubmit = async (e) => {
@@ -181,8 +241,11 @@ const QuoteForm = () => {
     
     setLoading(true);
     
+    // URL de producción (la que te dará Railway) o localhost para desarrollo
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    
     try {
-      const response = await fetch('http://localhost:5000/api/quote', {
+      const response = await fetch(`${API_URL}/api/quote`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -194,15 +257,31 @@ const QuoteForm = () => {
         setTimeout(() => {
           setLoading(false);
           setSubmitted(true);
-        }, 3000); // 3 segundos de animación para que se aprecie el bus
+          Swal.fire({
+            icon: 'success',
+            title: '¡Solicitud Enviada!',
+            text: 'Tu cotización ha sido procesada correctamente.',
+            timer: 3000,
+            showConfirmButton: false
+          });
+        }, 3000);
       } else {
         setLoading(false);
-        alert('Hubo un error al enviar la solicitud.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un problema al enviar la solicitud.',
+          confirmButtonColor: '#004080'
+        });
       }
     } catch (error) {
       setLoading(false);
-      console.error('Error:', error);
-      alert('No se pudo conectar con el servidor.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de Conexión',
+        text: 'No se pudo conectar con el servidor.',
+        confirmButtonColor: '#004080'
+      });
     }
   };
 
@@ -315,14 +394,24 @@ const QuoteForm = () => {
                         <Col md={6}>
                           <Form.Group className="mb-3">
                             <Form.Label>Teléfono de Contacto</Form.Label>
-                            <Form.Control 
-                              type="tel" 
-                              name="phone" 
-                              required 
-                              placeholder="+56 9 1234 5678" 
-                              onChange={handleChange}
+                            <PhoneInput
+                              country={'cl'}
                               value={formData.phone}
+                              onChange={handlePhoneChange}
+                              inputProps={{
+                                name: 'phone',
+                                required: true,
+                              }}
+                              containerClass="phone-input-container"
+                              inputClass="form-control w-100"
+                              buttonClass="phone-input-button"
+                              placeholder="9 1234 5678"
+                              masks={{cl: '. .... ....'}}
+                              localization={{cl: 'Chile'}}
                             />
+                            {!isPhoneValid(formData.phone) && formData.phone.length > 2 && (
+                              <small className="text-danger">Formato: 9 XXXX XXXX</small>
+                            )}
                           </Form.Group>
                         </Col>
                         <Col md={12}>
@@ -392,6 +481,7 @@ const QuoteForm = () => {
                               type="number" 
                               name="passengers" 
                               required 
+                              min="1"
                               placeholder="Ej: 40" 
                               onChange={handleChange}
                               value={formData.passengers}
