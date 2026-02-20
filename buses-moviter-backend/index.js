@@ -25,12 +25,17 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Configuración de Nodemailer para Gmail (simplificada)
+// Configuración de Nodemailer para Gmail (más robusta para Railway)
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // true para 465, false para otros puertos
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
   }
 });
 
