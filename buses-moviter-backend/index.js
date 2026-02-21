@@ -1,14 +1,18 @@
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
-const axios = require('axios');
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = Number(process.env.PORT) || 8080;
 
 // 1. RUTA DE SALUD (Debe estar arriba de todo)
 app.get('/', (req, res) => {
-  res.status(200).send('OK');
+  res.status(200).send('OK - Backend is alive');
+});
+
+// Ruta adicional para salud
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'UP', timestamp: new Date() });
 });
 
 // 2. CONFIGURACIÓN DE CORS (Completa)
@@ -64,8 +68,9 @@ app.post('/api/quote', async (req, res) => {
 });
 
 // 5. ARRANQUE DEL SERVIDOR
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 SERVIDOR ESCUCHANDO EN PUERTO: ${PORT}`);
+const server = app.listen(PORT, () => {
+  const { address, port } = server.address();
+  console.log(`🚀 SERVIDOR ESCUCHANDO EN: http://${address}:${port}`);
 });
 
 // Capturar errores no manejados

@@ -1,0 +1,18 @@
+{
+  "name": "buses-moviter-monorepo",
+  "version": "1.0.0",
+  "description": "Monorepo for Buses Moviter",
+  "main": "buses-moviter-backend/index.js",
+  "scripts": {
+    "start": "node buses-moviter-backend/index.js",
+    "build": "cd buses-moviter-frontend && npm install && npm run build",
+    "backend": "cd buses-moviter-backend && npm start"
+  },
+  "dependencies": {
+    "express": "^4.21.1",
+    "cors": "^2.8.5",
+    "nodemailer": "^6.9.15",
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5"
+  }
+}
