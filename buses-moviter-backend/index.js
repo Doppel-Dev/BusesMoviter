@@ -6,31 +6,31 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// 1. CORS TOTALMENTE ABIERTO Y PRIMERO
+// 1. RUTA DE SALUD (Debe estar arriba de todo)
+app.get('/', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// 2. CONFIGURACIÓN DE CORS (Completa)
 app.use(cors());
-app.options('*', cors()); // Habilitar pre-flight para todas las rutas
+app.options('*', cors()); // Manejar pre-flight de forma global
 
 app.use(express.json());
 
-// 2. RUTA DE SALUD
-app.get('/', (req, res) => {
-  res.status(200).send('Servidor Buses Moviter Online');
-});
+// 3. LOG DE SUPERVIVENCIA (Para ver si el proceso sigue vivo)
+setInterval(() => {
+  console.log(`💓 Latido del servidor - ${new Date().toLocaleTimeString()} - Puerto: ${PORT}`);
+}, 10000);
 
-// 3. RUTA DE PRUEBA API
-app.get('/api/quote', (req, res) => {
-  res.status(200).send('API Quote está lista para recibir POST');
-});
-
-// 4. ENDPOINT REAL DE COTIZACIÓN
+// 4. ENDPOINT DE COTIZACIÓN
 app.post('/api/quote', async (req, res) => {
   console.log('📩 Petición POST recibida en /api/quote');
   
-  // Responder de inmediato para evitar bloqueos
-  res.status(200).json({ message: 'Solicitud recibida' });
+  // Responder de inmediato para evitar que Railway sospeche de lentitud
+  res.status(200).json({ message: 'Solicitud recibida correctamente' });
 
-  // Lógica de fondo
-  (async () => {
+  // Procesar email en segundo plano
+  setImmediate(async () => {
     try {
       const { name, email, phone, passengers, serviceType, company, details } = req.body;
       
@@ -38,7 +38,10 @@ app.post('/api/quote', async (req, res) => {
         host: 'smtp.gmail.com',
         port: 465,
         secure: true,
-        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+        auth: { 
+          user: process.env.EMAIL_USER, 
+          pass: process.env.EMAIL_PASS 
+        },
         tls: { rejectUnauthorized: false }
       });
 
@@ -46,16 +49,26 @@ app.post('/api/quote', async (req, res) => {
         from: process.env.EMAIL_USER,
         to: 'busesmoviter@hotmail.com',
         subject: `Nueva Cotización: ${name}`,
-        html: `<h3>Nueva Cotización</h3><p><strong>Cliente:</strong> ${name}</p><p><strong>Tel:</strong> ${phone}</p><p><strong>Servicio:</strong> ${serviceType}</p><p><strong>Pasajeros:</strong> ${passengers}</p><p><strong>Empresa:</strong> ${company || 'N/A'}</p><p><strong>Detalles:</strong> ${details || 'N/A'}</p>`
+        html: `<h3>Solicitud de Cotización</h3>
+               <p><strong>Cliente:</strong> ${name}</p>
+               <p><strong>Tel:</strong> ${phone}</p>
+               <p><strong>Pasajeros:</strong> ${passengers}</p>
+               <p><strong>Empresa:</strong> ${company || 'N/A'}</p>
+               <p><strong>Detalles:</strong> ${details || 'N/A'}</p>`
       });
       console.log('📧 Email enviado con éxito');
     } catch (e) {
-      console.error('❌ Error enviando email:', e.message);
+      console.error('❌ Error en proceso de email:', e.message);
     }
-  })();
+  });
 });
 
-// 5. ARRANQUE
+// 5. ARRANQUE DEL SERVIDOR
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Servidor en puerto ${PORT}`);
+  console.log(`🚀 SERVIDOR ESCUCHANDO EN PUERTO: ${PORT}`);
+});
+
+// Capturar errores no manejados
+process.on('uncaughtException', (err) => {
+  console.error('❌ Error Crítico:', err.message);
 });
