@@ -1,15 +1,20 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
 
+// Solo usar dotenv en desarrollo local
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 const app = express();
+// Railway inyecta el puerto automáticamente. NO lo fuerces en .env
 const PORT = process.env.PORT || 8080;
 
-// 1. RUTA DE SALUD (Mantenemos la victoria)
+// 1. RUTA DE SALUD INMEDIATA (OBLIGATORIO PARA RAILWAY)
 app.get('/', (req, res) => {
-  res.status(200).send('Servidor Buses Moviter OK');
+  res.status(200).send('OK');
 });
 
 // 2. Middlewares
@@ -28,7 +33,7 @@ const transporter = nodemailer.createTransport({
   tls: { rejectUnauthorized: false }
 });
 
-// 4. Endpoint de Cotización
+// 4. Endpoint de Cotización (Background Processing)
 app.post('/api/quote', async (req, res) => {
   const { name, email, phone, serviceType, passengers, date, tripType, trips, details, company } = req.body;
   if (!name || !email || !phone) return res.status(400).json({ error: 'Faltan campos' });
@@ -75,5 +80,5 @@ app.post('/api/quote', async (req, res) => {
 
 // 5. ARRANQUE
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('🚀 SERVIDOR ESTABLE EN LÍNEA EN PUERTO:', PORT);
+  console.log(`🚀 SERVIDOR ESCUCHANDO EN PUERTO: ${PORT}`);
 });
