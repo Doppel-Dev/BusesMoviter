@@ -48,7 +48,7 @@ app.post('/api/quote', async (req, res) => {
 
       const { data, error } = await resend.emails.send({
         from: 'Buses Moviter <onboarding@resend.dev>',
-        to: 'busesmoviter@hotmail.com',
+        to: 'busesmoviter.notificaciones@gmail.com',
         subject: `Nueva Cotización: ${name}`,
         html: `<h3>Solicitud de Cotización</h3>
                <p><strong>Cliente:</strong> ${name}</p>
