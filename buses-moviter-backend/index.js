@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
@@ -38,31 +39,45 @@ app.post('/api/quote', async (req, res) => {
     try {
       const { name, email, phone, passengers, serviceType, company, details } = req.body;
       
+      console.log('🔄 Iniciando envío de email para:', name);
+
+      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        throw new Error('Variables de entorno EMAIL_USER o EMAIL_PASS no configuradas');
+      }
+
       const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
+        service: 'gmail',
         auth: { 
           user: process.env.EMAIL_USER, 
           pass: process.env.EMAIL_PASS 
-        },
-        tls: { rejectUnauthorized: false }
+        }
       });
 
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
+      console.log('📤 Intentando conectar con Gmail...');
+      
+      const info = await transporter.sendMail({
+        from: `Buses Moviter <${process.env.EMAIL_USER}>`,
         to: 'busesmoviter@hotmail.com',
         subject: `Nueva Cotización: ${name}`,
         html: `<h3>Solicitud de Cotización</h3>
                <p><strong>Cliente:</strong> ${name}</p>
+               <p><strong>Email:</strong> ${email}</p>
                <p><strong>Tel:</strong> ${phone}</p>
                <p><strong>Pasajeros:</strong> ${passengers}</p>
+               <p><strong>Servicio:</strong> ${serviceType}</p>
                <p><strong>Empresa:</strong> ${company || 'N/A'}</p>
                <p><strong>Detalles:</strong> ${details || 'N/A'}</p>`
       });
-      console.log('📧 Email enviado con éxito');
+      
+      console.log('📧 Email enviado con éxito:', info.messageId);
     } catch (e) {
-      console.error('❌ Error en proceso de email:', e.message);
+      console.error('❌ Error en proceso de email:', e);
+      if (e.code === 'ECONNRESET') {
+        console.error('💡 Nota: ECONNRESET puede deberse a problemas de red o bloqueos de Gmail.');
+      }
+      if (e.code === 'ETIMEDOUT') {
+        console.error('💡 Nota: ETIMEDOUT indica que no se pudo conectar al servidor de Gmail. Verifica el puerto (465/587) y la red de Railway.');
+      }
     }
   });
 });
