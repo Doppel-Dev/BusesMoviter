@@ -1,10 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 8080;
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // 1. RUTA DE SALUD (Debe estar arriba de todo)
 app.get('/', (req, res) => {
@@ -39,31 +40,14 @@ app.post('/api/quote', async (req, res) => {
     try {
       const { name, email, phone, passengers, serviceType, company, details } = req.body;
       
-      console.log('🔄 Iniciando envío de email para:', name);
+      console.log('🔄 Iniciando envío de email vía Resend para:', name);
 
-      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        throw new Error('Variables de entorno EMAIL_USER o EMAIL_PASS no configuradas');
+      if (!process.env.RESEND_API_KEY) {
+        throw new Error('Variable de entorno RESEND_API_KEY no configurada');
       }
 
-      const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, // true para 465, false para otros puertos
-        auth: { 
-          user: process.env.EMAIL_USER, 
-          pass: process.env.EMAIL_PASS 
-        },
-        tls: {
-          // Forzar el uso de IPv4 para evitar el error ENETUNREACH de IPv6
-          family: 4,
-          rejectUnauthorized: false
-        }
-      });
-
-      console.log('📤 Intentando conectar con Gmail...');
-      
-      const info = await transporter.sendMail({
-        from: `Buses Moviter <${process.env.EMAIL_USER}>`,
+      const { data, error } = await resend.emails.send({
+        from: 'Buses Moviter <onboarding@resend.dev>',
         to: 'busesmoviter@hotmail.com',
         subject: `Nueva Cotización: ${name}`,
         html: `<h3>Solicitud de Cotización</h3>
@@ -75,16 +59,14 @@ app.post('/api/quote', async (req, res) => {
                <p><strong>Empresa:</strong> ${company || 'N/A'}</p>
                <p><strong>Detalles:</strong> ${details || 'N/A'}</p>`
       });
+
+      if (error) {
+        throw error;
+      }
       
-      console.log('📧 Email enviado con éxito:', info.messageId);
+      console.log('📧 Email enviado con éxito vía Resend:', data.id);
     } catch (e) {
-      console.error('❌ Error en proceso de email:', e);
-      if (e.code === 'ECONNRESET') {
-        console.error('💡 Nota: ECONNRESET puede deberse a problemas de red o bloqueos de Gmail.');
-      }
-      if (e.code === 'ETIMEDOUT') {
-        console.error('💡 Nota: ETIMEDOUT indica que no se pudo conectar al servidor de Gmail. Verifica el puerto (465/587) y la red de Railway.');
-      }
+      console.error('❌ Error en proceso de email (Resend):', e.message || e);
     }
   });
 });
